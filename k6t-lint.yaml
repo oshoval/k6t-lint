@@ -1,0 +1,13 @@
+# Which scripts to run, and the folders each one scans.
+# Override by placing this file in the repository being linted.
+linters:
+  domain-consts:
+    script: domain-consts.py
+    # Path component that owns the constants. Files already under it are skipped.
+    domain: network
+    # Trees scanned for exported consts defined outside the domain.
+    paths:
+      - pkg
+      - tests
+    ignore:
+      - pkg/virtctl/vmexport/vmexport.go:ACCEPT

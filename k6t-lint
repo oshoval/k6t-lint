@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Run the scripts listed in k6t-lint.yaml."""
+
+import subprocess
+import sys
+from pathlib import Path
+
+import yaml
+
+HERE = Path(__file__).resolve().parent
+
+
+def load_config() -> dict:
+    local = Path("k6t-lint.yaml")
+    path = local if local.is_file() else HERE / "k6t-lint.yaml"
+    if not path.is_file():
+        sys.exit("k6t-lint.yaml not found")
+    return yaml.safe_load(path.read_text())
+
+
+def main() -> int:
+    config = load_config()
+    linters = config.get("linters") or {}
+    if not linters:
+        sys.exit("k6t-lint.yaml has no linters")
+
+    failed = 0
+    for name, spec in linters.items():
+        script = HERE / "scripts" / spec["script"]
+        paths = spec.get("paths") or ["."]
+        cmd = [sys.executable, str(script), *paths]
+        if domain := spec.get("domain"):
+            cmd += ["--domain", domain]
+        for item in spec.get("ignore") or []:
+            cmd += ["--ignore", item]
+        print(f"== {name} ({', '.join(paths)})", flush=True)
+        result = subprocess.run(cmd)
+        if result.returncode != 0:
+            failed = result.returncode
+    return failed
+
+
+if __name__ == "__main__":
+    sys.exit(main())
