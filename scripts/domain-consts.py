@@ -106,9 +106,11 @@ def main() -> int:
         print(f"domain-consts: no {args.domain}-only consts defined outside {args.domain}/")
         return 0
 
-    print(f"domain-consts: consts used only under {args.domain}/ but defined elsewhere:")
+    print(f"domain-consts: {len(findings)} const(s) to move into {args.domain}")
     for defined_in, name, hits in findings:
-        print(f"  {defined_in}: {name}")
+        print(f"\n{defined_in}")
+        print(f"  {name}")
+        print(f"  used only in {args.domain}, declared outside {args.domain}; move it into {args.domain}")
         for hit in hits:
             print(f"    {hit}")
     return 1
